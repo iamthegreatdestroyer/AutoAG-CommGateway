@@ -1,0 +1,227 @@
+# Phases 3-8: Abbreviated Action Plans
+
+## Phase 3: MCP Server Discovery Engine (18-22 hours)
+
+**REF:** P3-005 | **Autonomy:** 90% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks
+
+- [ ] Server Registration API (`POST /api/v1/servers/register`)
+- [ ] Discovery Service (fetch tools from MCP servers)
+- [ ] Search & Filter System (full-text, category, price)
+- [ ] Health Monitoring (5-min checks, availability tracking)
+- [ ] Redis caching (1-hour TTL)
+- [ ] Rate limiting (10 req/min for registration)
+
+### Checkpoints
+
+- Server registration completes <2s
+- Search returns results <100ms
+- Redis caching reduces DB queries 80%+
+
+---
+
+## Phase 4: Tool Invocation Engine (20-25 hours)
+
+**REF:** P4-006 | **Autonomy:** 80% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks
+
+- [ ] Invocation API (`POST /api/v1/tools/:id/invoke`)
+- [ ] MCPProxyService (forward requests to MCP servers)
+- [ ] ⚠️ Payment integration (REQUIRES CONSULTATION)
+- [ ] Error handling with retries (exponential backoff)
+- [ ] Circuit breaker (fail after 3 errors)
+- [ ] Invocation logging (input/output hashes)
+
+### Checkpoints
+
+- Successful invocations <5s
+- Retry logic functions correctly
+- All invocations logged accurately
+
+---
+
+## Phase 5: x402 Payment Integration (15-20 hours)
+
+**REF:** P5-007 | **Autonomy:** 60% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks (⚠️ ALL REQUIRE EXTENSIVE CONSULTATION)
+
+- [ ] x402 protocol implementation
+- [ ] Wallet management strategy
+- [ ] Payment verification system
+- [ ] Escrow & settlement (commission structure)
+- [ ] Refund processing
+- [ ] Transaction logging
+
+### Critical Decisions Required
+
+1. Wallet provider selection
+2. Key management approach
+3. Payment flow UX
+4. Commission structure (%)
+5. Settlement schedule
+
+---
+
+## Phase 6: Analytics & Monitoring (12-15 hours)
+
+**REF:** P6-008 | **Autonomy:** 90% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks
+
+- [ ] Analytics API (stats, revenue, system health)
+- [ ] Usage tracking service
+- [ ] Performance monitoring (response times, cache hits)
+- [ ] Alerting system (email, Slack, Discord)
+- [ ] Grafana dashboards
+
+### Ports Used
+
+- Prometheus: 18540
+- Grafana: 18541
+- Loki: 18550
+- Jaeger: 18560-18562
+
+---
+
+## Phase 7: API Gateway & Security (15-18 hours)
+
+**REF:** P7-009 | **Autonomy:** 85% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks
+
+- [ ] JWT authentication system
+- [ ] API key management
+- [ ] Rate limiting (Redis-based, tiered)
+- [ ] Request validation (Zod schemas)
+- [ ] Security middleware (CORS, Helmet, XSS, CSRF)
+- [ ] OpenAPI 3.0 documentation (Swagger UI at Port 18570)
+
+### Rate Limit Tiers
+
+- Public: 100 req/hour
+- Authenticated: 1000 req/hour
+- Premium: 10,000 req/hour
+
+---
+
+## Phase 8: Testing, Documentation & Deployment (15-20 hours)
+
+**REF:** P8-010 | **Autonomy:** 85% | **Status:** ⚪ NOT STARTED
+
+### Key Tasks
+
+#### Testing (Target: 85%+ coverage)
+
+- [ ] Unit tests (90%+ coverage)
+- [ ] Integration tests (85%+ coverage)
+- [ ] E2E tests (80%+ coverage)
+- [ ] Load testing (1000 concurrent users)
+
+#### Documentation
+
+- [ ] Complete API docs (OpenAPI)
+- [ ] Architecture diagrams
+- [ ] Deployment guide
+- [ ] Troubleshooting guide
+
+#### Deployment (⚠️ REQUIRES CONSULTATION)
+
+- [ ] Choose hosting provider
+- [ ] Kubernetes/Docker Swarm setup
+- [ ] Production environment config
+- [ ] Monitoring & logging setup
+- [ ] CI/CD finalization
+
+### Pre-Launch Checklist
+
+- [ ] Test coverage ≥85%
+- [ ] Security audit passed
+- [ ] Load testing successful
+- [ ] Monitoring operational
+- [ ] Documentation complete
+
+---
+
+## Cross-Phase Notes
+
+### Port Summary (18500-18599)
+
+- **API:** 18500 (prod), 18501 (dev)
+- **Database:** 18510 (PostgreSQL)
+- **Cache:** 18520 (Redis)
+- **Proxy:** 18530 (Nginx)
+- **Monitoring:** 18540-18541 (Prometheus, Grafana)
+- **Logging:** 18550 (Loki)
+- **Tracing:** 18560-18562 (Jaeger)
+- **Dev Tools:** 18570 (Swagger), 18580-18581 (DB/Redis UI), 18590-18591 (Mailhog)
+
+### Critical Consultation Points
+
+1. **Phase 2:** Database schema approval
+2. **Phase 4:** Payment integration strategy
+3. **Phase 5:** All x402 implementation details
+4. **Phase 7:** Rate limit thresholds
+5. **Phase 8:** Hosting provider & deployment strategy
+
+### Dependencies Chain
+
+```
+Phase 1 (Foundation)
+  ├─> Phase 2 (Database)
+  │     ├─> Phase 3 (Discovery)
+  │     └─> Phase 4 (Invocation)
+  │           └─> Phase 5 (Payment)
+  └─> Phase 6 (Analytics)
+        └─> Phase 7 (Security)
+              └─> Phase 8 (Testing & Deploy)
+```
+
+---
+
+## Estimated Timeline
+
+**Sequential (Single Developer):**
+
+- Phase 1: Week 1 (15h)
+- Phase 2: Week 1-2 (18h)
+- Phase 3: Week 2-3 (22h)
+- Phase 4: Week 3-4 (25h)
+- Phase 5: Week 4-5 (20h)
+- Phase 6: Week 5-6 (15h)
+- Phase 7: Week 6-7 (18h)
+- Phase 8: Week 7-8 (20h)
+
+**Total:** ~8 weeks (153 hours)
+
+---
+
+## Risk Mitigation Strategy
+
+### High-Risk Items
+
+1. **x402 Integration** - Mitigation: Extensive testnet testing, fallback to traditional payments
+2. **MCP Server Reliability** - Mitigation: Health monitoring, circuit breakers
+3. **Security Vulnerabilities** - Mitigation: Regular audits, automated security scanning
+
+### Low-Risk Items
+
+- Repository setup (Phase 1)
+- Database schema (Phase 2)
+- Testing infrastructure (Phase 8)
+
+---
+
+**Complete detailed plans available:**
+
+- ✅ [PHASE-1-FOUNDATION.md](./PHASE-1-FOUNDATION.md)
+- ✅ [PHASE-2-DATABASE.md](./PHASE-2-DATABASE.md)
+- 📝 Phases 3-8: Abbreviated above (Full plans available on request)
+
+---
+
+**Status:** ⚪ ALL PHASES PENDING  
+**Ready to Begin:** Phase 1 (awaiting approval)  
+**Last Updated:** January 13, 2026

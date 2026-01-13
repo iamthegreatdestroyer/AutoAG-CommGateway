@@ -1,0 +1,609 @@
+# Phase 1: Foundation & Repository Setup
+
+**REF:** P1-003  
+**Duration:** 12-15 hours  
+**Autonomy Level:** 95% autonomous  
+**Status:** ⚪ NOT STARTED
+
+---
+
+## Objectives
+
+- [x] ✅ Port assignments completed (18500-18599)
+- [ ] Initialize repository structure
+- [ ] Configure development environment
+- [ ] Establish CI/CD pipeline
+- [ ] Set up containerization
+
+---
+
+## Task Checklist
+
+### 1.1 Repository Initialization (2 hours)
+
+#### Git Setup
+
+- [ ] Clone repository from https://github.com/iamthegreatdestroyer/AutoAG-CommGateway.git
+- [ ] Create `develop` branch
+- [ ] Set up git flow branching strategy
+- [ ] Configure `.gitignore` for Node.js/TypeScript
+- [ ] Create initial commit with README
+
+**Commands:**
+
+```bash
+git clone https://github.com/iamthegreatdestroyer/AutoAG-CommGateway.git
+cd AutoAG-CommGateway
+git checkout -b develop
+git push -u origin develop
+```
+
+#### Directory Structure
+
+- [ ] Create all required directories per architecture
+
+```
+AutoAG-CommGateway/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml
+│   │   ├── cd.yml
+│   │   └── security-scan.yml
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   └── ISSUE_TEMPLATE/
+├── src/
+│   ├── api/
+│   │   ├── routes/
+│   │   ├── middleware/
+│   │   └── controllers/
+│   ├── services/
+│   │   ├── discovery/
+│   │   ├── invocation/
+│   │   ├── payment/
+│   │   └── analytics/
+│   ├── models/
+│   │   └── repositories/
+│   ├── types/
+│   ├── utils/
+│   └── config/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── scripts/
+│   ├── setup-dev.sh
+│   ├── seed-db.sh
+│   └── generate-types.sh
+├── docker/
+│   ├── Dockerfile.api
+│   ├── Dockerfile.worker
+│   └── docker-compose.yml
+├── docs/
+│   ├── api/
+│   ├── architecture/
+│   └── deployment/
+└── ACTION-PLANS/
+    ├── 00-PORT-ASSIGNMENTS.md ✅
+    ├── 00-MASTER-PROJECT-TRACKER.md ✅
+    └── PHASE-*.md
+```
+
+---
+
+### 1.2 Package Configuration (3 hours)
+
+#### package.json Creation
+
+- [ ] Initialize npm project
+- [ ] Configure TypeScript 5.3+
+- [ ] Add Express 4.18+ for API server
+- [ ] Add PostgreSQL client (pg, @types/pg)
+- [ ] Add Redis client (ioredis)
+- [ ] Add Zod for validation
+- [ ] Add Jest + Supertest for testing
+- [ ] Add ESLint + Prettier
+- [ ] Add Husky for git hooks
+- [ ] Configure scripts (dev, build, test, lint)
+
+**Required Dependencies:**
+
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "ioredis": "^5.3.2",
+    "zod": "^3.22.4",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.5",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.11",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "supertest": "^6.3.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/parser": "^6.16.0",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "prettier": "^3.1.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.0.2"
+  }
+}
+```
+
+**Scripts to add:**
+
+```json
+{
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky install"
+  }
+}
+```
+
+---
+
+### 1.3 TypeScript Configuration (1 hour)
+
+#### tsconfig.json
+
+- [ ] Create strict TypeScript configuration
+- [ ] Configure module resolution
+- [ ] Set up path aliases
+- [ ] Configure source maps
+- [ ] Enable declaration files
+
+**Configuration:**
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@api/*": ["api/*"],
+      "@services/*": ["services/*"],
+      "@models/*": ["models/*"],
+      "@utils/*": ["utils/*"],
+      "@config/*": ["config/*"],
+      "@types/*": ["types/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests"]
+}
+```
+
+#### ESLint Configuration
+
+- [ ] Create `.eslintrc.js` with TypeScript rules
+- [ ] Configure import/export rules
+- [ ] Set up Prettier integration
+
+#### Prettier Configuration
+
+- [ ] Create `.prettierrc`
+- [ ] Configure formatting rules
+- [ ] Set up `.prettierignore`
+
+---
+
+### 1.4 CI/CD Pipeline (3 hours)
+
+#### GitHub Actions - CI Workflow
+
+- [ ] Create `.github/workflows/ci.yml`
+- [ ] Configure Node.js 20 matrix
+- [ ] Set up dependency caching
+- [ ] Add lint step
+- [ ] Add type check step
+- [ ] Add test step with coverage
+- [ ] Add build step
+- [ ] Add security scan (npm audit)
+
+**CI Workflow:**
+
+```yaml
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+      - name: Build
+        run: npm run build
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+```
+
+#### GitHub Actions - CD Workflow
+
+- [ ] Create `.github/workflows/cd.yml`
+- [ ] Add Docker build step
+- [ ] Add image push to registry
+- [ ] Configure deployment triggers
+
+#### GitHub Actions - Security Scan
+
+- [ ] Create `.github/workflows/security-scan.yml`
+- [ ] Add Snyk integration
+- [ ] Configure vulnerability alerts
+
+---
+
+### 1.5 Docker Configuration (3 hours)
+
+#### Multi-stage Dockerfile.api
+
+- [ ] Create `docker/Dockerfile.api`
+- [ ] Build stage: compile TypeScript
+- [ ] Production stage: minimal runtime
+- [ ] Configure non-root user
+- [ ] Add health check endpoint
+
+**Dockerfile.api:**
+
+```dockerfile
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+
+USER nodejs
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+CMD ["node", "dist/index.js"]
+```
+
+#### Docker Compose Configuration
+
+- [ ] Create `docker/docker-compose.yml`
+- [ ] Configure API service (Port 18500)
+- [ ] Configure PostgreSQL 15 (Port 18510)
+- [ ] Configure Redis 7 (Port 18520)
+- [ ] Configure Nginx (Port 18530)
+- [ ] Add volume mounts for development
+- [ ] Configure networks
+- [ ] Add health checks
+
+**docker-compose.yml:**
+
+```yaml
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: autoag-api
+    ports:
+      - "18500:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://autoag:autoag_secret@postgres:5432/autoag
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../src:/app/src
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: autoag-postgres
+    ports:
+      - "18510:5432"
+    environment:
+      - POSTGRES_DB=autoag
+      - POSTGRES_USER=autoag
+      - POSTGRES_PASSWORD=autoag_secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoag"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: autoag-redis
+    ports:
+      - "18520:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: autoag-nginx
+    ports:
+      - "18530:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  autoag-network:
+    driver: bridge
+```
+
+#### Development Scripts
+
+- [ ] Create `scripts/setup-dev.sh` for initial setup
+- [ ] Create `scripts/teardown.sh` for cleanup
+- [ ] Make scripts executable
+
+---
+
+### 1.6 Environment Configuration (1 hour)
+
+#### .env.example
+
+- [ ] Create `.env.example` with all required variables
+- [ ] Document each environment variable
+- [ ] Include port assignments (18500-18599)
+
+**.env.example:**
+
+```bash
+# Application
+NODE_ENV=development
+API_PORT=18500
+API_HOST=0.0.0.0
+
+# Database
+DATABASE_URL=postgresql://autoag:autoag_secret@localhost:18510/autoag
+POSTGRES_HOST=localhost
+POSTGRES_PORT=18510
+POSTGRES_DB=autoag
+POSTGRES_USER=autoag
+POSTGRES_PASSWORD=autoag_secret
+
+# Redis
+REDIS_URL=redis://localhost:18520
+REDIS_HOST=localhost
+REDIS_PORT=18520
+
+# JWT Authentication
+JWT_SECRET=your-secret-key-change-in-production
+JWT_EXPIRES_IN=1h
+JWT_REFRESH_EXPIRES_IN=7d
+
+# x402 Payment (To be configured in Phase 5)
+X402_ENABLED=false
+X402_WALLET_ADDRESS=
+X402_PRIVATE_KEY=
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=900000  # 15 minutes
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Monitoring
+PROMETHEUS_PORT=18540
+GRAFANA_PORT=18541
+JAEGER_UI_PORT=18560
+
+# Development Tools
+SWAGGER_PORT=18570
+```
+
+#### .gitignore
+
+- [ ] Create comprehensive `.gitignore`
+- [ ] Exclude `.env` files
+- [ ] Exclude build artifacts
+- [ ] Exclude IDE files
+
+---
+
+## Checkpoint 1.1: Human Review Required
+
+### Verification Commands
+
+```bash
+# Install and verify
+npm install
+npm run lint
+npm run type-check
+npm test
+
+# Docker verification
+cd docker
+docker-compose up -d
+docker-compose ps
+docker-compose logs -f api
+
+# Health check
+curl http://localhost:18500/health
+```
+
+### Expected Outcomes
+
+- ✅ All dependencies installed without conflicts
+- ✅ Lint passes with 0 errors
+- ✅ Type check passes
+- ✅ Initial test suite passes
+- ✅ Docker containers start successfully
+- ✅ API responds to health check
+- ✅ CI pipeline runs green
+
+### Human Decision Points
+
+1. Review and approve final dependency choices
+2. Confirm Docker resource allocations
+3. Approve CI/CD pipeline configuration
+4. Verify port assignments (18500-18599)
+
+---
+
+## Success Criteria
+
+- [ ] Repository structure matches specification
+- [ ] All configuration files created
+- [ ] TypeScript compiles without errors
+- [ ] Docker containers start and run
+- [ ] CI/CD pipeline executes successfully
+- [ ] Basic health endpoint returns 200
+- [ ] Documentation is clear and complete
+
+---
+
+## Time Tracking
+
+| Task              | Estimated | Actual | Notes |
+| ----------------- | --------- | ------ | ----- |
+| Repository Init   | 2h        | -      |       |
+| Package Config    | 3h        | -      |       |
+| TypeScript Config | 1h        | -      |       |
+| CI/CD Pipeline    | 3h        | -      |       |
+| Docker Config     | 3h        | -      |       |
+| Environment Setup | 1h        | -      |       |
+| **Total**         | **13h**   | **-**  |       |
+
+---
+
+## Notes & Blockers
+
+### Current Blockers
+
+- None (awaiting approval to begin)
+
+### Dependencies
+
+- None (first phase)
+
+### Future Phases Enabled
+
+Upon completion:
+
+- ✅ Phase 2 can begin (database schema)
+- ✅ Phase 3 can begin (discovery engine)
+
+---
+
+**Status:** ⚪ NOT STARTED  
+**Last Updated:** January 13, 2026  
+**Next Action:** Await approval from human to begin implementation
