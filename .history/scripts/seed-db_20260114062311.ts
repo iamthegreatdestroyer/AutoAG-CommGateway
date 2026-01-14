@@ -108,7 +108,7 @@ async function main(): Promise<void> {
       tags: ['nlp', 'sentiment', 'entities', 'translation'],
       healthStatus: 'HEALTHY',
       totalCalls: 5420,
-      totalRevenue: 299.9,
+      totalRevenue: 299.90,
       rating: 4.8,
       reviewCount: 48,
       publishedAt: new Date(),
