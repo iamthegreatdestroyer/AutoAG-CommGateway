@@ -1,0 +1,23 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Placeholder models - will be fully implemented in Phase 2
+model MCPServer {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  baseUrl   String   @map("base_url")
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("mcp_servers")
+}

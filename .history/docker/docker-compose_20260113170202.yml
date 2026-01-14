@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: autoag-api
+    ports:
+      - "18500:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://autoag:autoag_secret@postgres:5432/autoag
+      - REDIS_URL=redis://redis:6379
+      - API_PORT=3000
+      - LOG_LEVEL=debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../src:/app/src
+      - ../package.json:/app/package.json
+      - ../tsconfig.json:/app/tsconfig.json
+    networks:
+      - autoag-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: autoag-postgres
+    ports:
+      - "18510:5432"
+    environment:
+      - POSTGRES_DB=autoag
+      - POSTGRES_USER=autoag
+      - POSTGRES_PASSWORD=autoag_secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoag"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: autoag-redis
+    ports:
+      - "18520:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - autoag-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: autoag-nginx
+    ports:
+      - "18530:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - autoag-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  autoag-network:
+    driver: bridge

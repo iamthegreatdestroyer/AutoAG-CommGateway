@@ -1,0 +1,6 @@
+build/
+dist/
+coverage/
+*.md
+!README.md
+!CHANGELOG.md
