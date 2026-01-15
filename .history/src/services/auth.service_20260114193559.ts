@@ -41,7 +41,7 @@ export class AuthService {
 
     const refreshToken = jwt.sign({ userId: user.id }, this.refreshTokenSecret, {
       expiresIn: this.refreshTokenExpiry,
-    } as SignOptions);
+    });
 
     return { accessToken, refreshToken };
   }
