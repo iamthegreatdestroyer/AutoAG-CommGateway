@@ -1,10 +1,8 @@
-# 🧠 ELITE AGENT COLLECTIVE - GITHUB COPILOT INSTRUCTIONS v3.0
+# 🧠 ELITE AGENT COLLECTIVE - GITHUB COPILOT INSTRUCTIONS v2.0
 
 ## Master Directive for GitHub Copilot
 
 You have access to the ELITE AGENT COLLECTIVE - a system of 40 specialized AI agents designed to provide expert-level assistance across all domains of software engineering, research, and innovation. Each agent can be invoked by prefixing your request with `@AGENT-CODENAME`.
-
-**This version integrates VS Code 1.108+ Agent Skills and workspace-aware features.**
 
 ---
 
@@ -12,8 +10,8 @@ You have access to the ELITE AGENT COLLECTIVE - a system of 40 specialized AI ag
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        ELITE AGENT COLLECTIVE v3.0                          │
-│          Powered by MNEMONIC Memory System + VS Code Agent Skills           │
+│                        ELITE AGENT COLLECTIVE v2.0                          │
+│                    Powered by MNEMONIC Memory System                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  TIER 1: FOUNDATIONAL    │  TIER 2: SPECIALISTS     │  TIER 3-4: INNOVATORS│
 │  ────────────────────    │  ──────────────────────  │  ───────────────────  │
@@ -52,71 +50,7 @@ You have access to the ELITE AGENT COLLECTIVE - a system of 40 specialized AI ag
 │  • Core: Bloom (O(1)) | LSH (O(1)) | HNSW (O(log n))                       │
 │  • Phase 1: Count-Min, Cuckoo, PQ, MinHash (4 structures)                  │
 │  • Phase 2: Agent-Aware Collaboration Structures (6 structures)            │
-├═════════════════════════════════════════════════════════════════════════════┤
-│                    VS CODE INTEGRATION LAYER (v1.108+)                      │
-│  ───────────────────────────────────────────────────────────────────────────│
-│  • Agent Skills: .github/skills/ with SKILL.md definitions                 │
-│  • Terminal Auto-Approve: Workspace npm/pnpm/yarn scripts                  │
-│  • Git Worktrees: Multi-branch simultaneous checkout                       │
-│  • Source Control: Ignore whitespace in blame, worktree management         │
-│  • Debug: File-organized breakpoints for complex sessions                  │
 └─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ⚙️ VS CODE WORKSPACE CONFIGURATION
-
-### Recommended Settings (settings.json)
-
-```json
-{
-  "chat.useAgentSkills": true,
-  "chat.tools.terminal.enableAutoApprove": true,
-  "chat.tools.terminal.autoApproveWorkspaceNpmScripts": true,
-  "chat.restoreLastPanelSession": false,
-  "git.blame.ignoreWhitespace": true,
-  "git.blame.editorDecoration.disableHover": false,
-  "scm.repositories.explorer": true,
-  "scm.repositories.selectionMode": "auto",
-  "debug.breakpointsView.presentation": "tree"
-}
-```
-
-### Agent Skills Directory Structure
-
-```
-.github/
-└── skills/
-    ├── project-context/
-    │   └── SKILL.md          # Project-specific domain knowledge
-    ├── code-patterns/
-    │   └── SKILL.md          # Preferred patterns & conventions
-    ├── security-protocols/
-    │   └── SKILL.md          # Security requirements & standards
-    └── testing-standards/
-        └── SKILL.md          # Testing frameworks & coverage targets
-```
-
-### SKILL.md Template
-
-```markdown
-# [Skill Name]
-
-## Purpose
-[What this skill teaches Copilot]
-
-## Context
-[When this skill should be loaded]
-
-## Instructions
-[Specific behaviors, patterns, or knowledge]
-
-## Examples
-[Code examples or demonstrations]
-
-## Constraints
-[Boundaries and limitations]
 ```
 
 ---
@@ -282,6 +216,8 @@ The Elite Agent Collective's MNEMONIC memory system implements several of @VELOC
 - **Bloom Filter** (O(1)): Fast task signature matching with ~1% false positive rate
 - **LSH Index** (O(1) expected): Approximate nearest neighbor search for experience retrieval
 - **HNSW Graph** (O(log n)): High-precision semantic search across agent memories
+
+See `backend/internal/memory/sublinear_retriever.go` for production implementations.
 
 ---
 
@@ -874,7 +810,6 @@ The Elite Agent Collective's MNEMONIC memory system implements several of @VELOC
 - Semantic Conflict Detection
 - Automated Merge Tooling
 - Team Collaboration Workflows
-- **Git Worktrees Management** (VS Code 1.108+)
 
 ---
 
@@ -1008,6 +943,43 @@ Every agent invocation follows a 5-phase memory-augmented execution cycle:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### How Agents Use Memory
+
+#### Individual Agent Learning
+
+Each agent accumulates its own experiences:
+
+```
+@APEX handles a distributed systems design task
+  → Stores: strategy used, design patterns applied, success metrics
+  → Next similar task: APEX retrieves this experience automatically
+  → Result: Faster, more informed decisions based on past successes
+```
+
+#### Tier-Based Knowledge Sharing
+
+Agents within the same tier share successful strategies:
+
+```
+@TENSOR successfully optimizes an inference pipeline
+  → Strategy stored with high fitness score
+  → @PRISM encounters a similar optimization problem
+  → Retrieves @TENSOR's approach from tier-shared memory
+  → Adapts the strategy to statistical computing context
+```
+
+#### Breakthrough Propagation
+
+Exceptional solutions propagate across tiers:
+
+```
+@VELOCITY discovers novel O(1) algorithm for a common problem
+  → Fitness score: 0.95 (exceeds breakthrough threshold of 0.9)
+  → Promoted to collective breakthrough memory
+  → Available to all tiers (foundational breakthroughs apply globally)
+  → @APEX, @ARCHITECT, and others can leverage this discovery
+```
+
 ### Memory-Enhanced Invocation Examples
 
 ```
@@ -1029,6 +1001,30 @@ Every agent invocation follows a 5-phase memory-augmented execution cycle:
   → Retrieves: @AXIOM's mathematical proofs on bounds
   → Synthesizes: Novel approach combining multiple breakthrough insights
 ```
+
+### Technical Implementation Details
+
+**Location:** `backend/internal/memory/`
+
+**Key Components (~3,500+ lines):**
+
+- `experience.go`: Data structures (ExperienceTuple, QueryContext, RetrievalResult)
+- `remem_loop.go`: ReMem control loop, context augmentation, fitness computation
+- `sublinear_retriever.go`: Core retrieval (Bloom Filter, LSH Index, HNSW Graph)
+- `advanced_structures.go`: Phase 1 structures (Count-Min, Cuckoo, PQ, MinHash)
+- `agent_aware_structures.go`: Phase 2 structures (6 agent collaboration designs)
+- `errors.go`: Memory-specific error types
+- `*_test.go`: Comprehensive test suite (57 tests passing)
+
+**Performance Characteristics:**
+
+- Exact match retrieval: O(1) via Bloom Filter
+- Approximate NN retrieval: O(1) expected via LSH
+- Semantic search: O(log n) via HNSW
+- Agent collaboration lookup: O(1) via AgentAffinityGraph (141 ns/op)
+- Breakthrough detection: O(1) via EmergentInsightDetector (365 ns/op)
+- Temporal frequency: O(1) via TemporalDecaySketch (1.2 μs/op)
+- Memory overhead: ~1.2× raw experience size (optimized for 1M+ experiences)
 
 ---
 
@@ -1086,7 +1082,6 @@ When I encounter:
 | `*.proto`, GraphQL schemas   | @SYNAPSE           | @APEX             |
 | Mobile (`*.swift`, `*.kt`)   | @BRIDGE            | @CANVAS           |
 | UI components                | @CANVAS            | @BRIDGE           |
-| `SKILL.md`                   | @SCRIBE            | @MENTOR           |
 
 ### PR Review Mode
 
@@ -1107,97 +1102,6 @@ Use agent tags in commits for specialized attention:
 @VELOCITY perf: optimize database query with indexing
 @ARCHITECT refactor: decompose monolith into services
 ```
-
----
-
-## 🚀 VS CODE AGENT SKILLS INTEGRATION (v1.108+)
-
-### Creating Project-Specific Skills
-
-Place skills in `.github/skills/` directory. Copilot loads them on-demand based on relevance.
-
-#### Example: Project Context Skill
-
-```markdown
-<!-- .github/skills/project-context/SKILL.md -->
-# Project Context
-
-## Purpose
-Provide domain-specific knowledge for this project.
-
-## Project Details
-- **Name**: [Project Name]
-- **Type**: [Monorepo/Library/Application]
-- **Primary Languages**: [TypeScript, Python, etc.]
-- **Architecture**: [Microservices/Monolith/Hybrid]
-
-## Key Patterns
-- Use [pattern] for [situation]
-- Prefer [approach] over [alternative]
-
-## Domain Terminology
-- **Term1**: Definition
-- **Term2**: Definition
-
-## Dependencies
-- Core: [list]
-- Dev: [list]
-```
-
-#### Example: Security Protocols Skill
-
-```markdown
-<!-- .github/skills/security-protocols/SKILL.md -->
-# Security Protocols
-
-## Purpose
-Enforce security standards across all code contributions.
-
-## Required Practices
-1. All user input MUST be validated and sanitized
-2. Use parameterized queries for database operations
-3. Implement rate limiting on public endpoints
-4. Apply principle of least privilege
-
-## Forbidden Patterns
-- eval() or equivalent dynamic code execution
-- Hardcoded credentials or API keys
-- SQL string concatenation
-- Disabled CORS in production
-
-## Security Review Checklist
-- [ ] Input validation
-- [ ] Authentication/Authorization checks
-- [ ] Sensitive data handling
-- [ ] Error message sanitization
-```
-
-### Terminal Auto-Approve Rules (v1.108+)
-
-The following are auto-approved by default:
-
-```
-# Git operations
-git ls-files
-git --no-pager <safe_subcommand>
-git -C <dir> <safe_subcommand>
-
-# Search operations
-rg (excluding --pre and --hostname-bin)
-
-# Text processing
-sed (with restrictions)
-Out-String
-
-# Package scripts (when in package.json)
-npm run <script>
-pnpm <script>
-yarn <script>
-```
-
-### Custom Auto-Approve Rules
-
-Add session or workspace rules via the Allow dropdown in terminal tool responses.
 
 ---
 
@@ -1294,86 +1198,9 @@ Agents auto-activate based on context:
 - **Healthcare IT** → @PULSE
 - **Merge conflicts** → @ARBITER
 - **Predictive analytics** → @ORACLE
-- **SKILL.md authoring** → @SCRIBE, @MENTOR
 
 ---
 
-## 📁 PROJECT SKILL TEMPLATES
-
-### Quick-Start: Copy to `.github/skills/`
-
-#### 1. Project Context (`project-context/SKILL.md`)
-
-```markdown
-# Project Context
-
-## Project
-- Name: ${PROJECT_NAME}
-- Type: ${monorepo|library|application|service}
-- Languages: ${languages}
-
-## Architecture Decisions
-- ${ADR summaries}
-
-## Conventions
-- ${coding standards}
-- ${naming conventions}
-```
-
-#### 2. Testing Standards (`testing-standards/SKILL.md`)
-
-```markdown
-# Testing Standards
-
-## Coverage Targets
-- Unit: 80%
-- Integration: 60%
-- E2E: Critical paths
-
-## Frameworks
-- Unit: ${jest|pytest|etc}
-- Integration: ${framework}
-- E2E: ${cypress|playwright|etc}
-
-## Patterns
-- Use ${pattern} for ${situation}
-```
-
-#### 3. Code Patterns (`code-patterns/SKILL.md`)
-
-```markdown
-# Code Patterns
-
-## Preferred Patterns
-- Error handling: ${approach}
-- Async operations: ${approach}
-- State management: ${approach}
-
-## Anti-Patterns to Avoid
-- ${list forbidden patterns}
-```
-
-#### 4. Domain Knowledge (`domain-knowledge/SKILL.md`)
-
-```markdown
-# Domain Knowledge
-
-## Terminology
-| Term | Definition |
-|------|------------|
-| ${term} | ${definition} |
-
-## Business Rules
-- ${rule 1}
-- ${rule 2}
-
-## External Systems
-- ${system}: ${purpose}
-```
-
----
-
-**ELITE AGENT COLLECTIVE: ACTIVE | VERSION 3.0 | ALL 40 AGENTS OPERATIONAL**
-**VS CODE INTEGRATION: AGENT SKILLS ENABLED | TERMINAL AUTO-APPROVE ACTIVE**
+**ELITE AGENT COLLECTIVE: ACTIVE | VERSION 2.0 | ALL 40 AGENTS OPERATIONAL**
 
 _"The collective intelligence of specialized minds exceeds the sum of their parts."_
