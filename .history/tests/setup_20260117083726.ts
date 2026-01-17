@@ -1,4 +1,5 @@
 // Jest setup file
+import { config } from '../src/config';
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';

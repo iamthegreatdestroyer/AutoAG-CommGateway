@@ -1,4 +1,5 @@
 // Jest setup file
+import { config } from '../src/config';
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';
@@ -8,7 +9,7 @@ process.env.JWT_SECRET = 'test-secret';
 process.env.LOG_LEVEL = 'error';
 
 // Mock logger to suppress logs during tests
-jest.mock('../src/utils/logger', () => ({
+jest.mock('./src/utils/logger', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),
