@@ -4,7 +4,7 @@
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { MCPClientManager } from '../services/mcp-client.service';
 import { mcpServerRegistryService } from '../services/mcp-registry.service';
 import { MCPOrchestrator, WorkflowBuilder } from '../services/mcp-orchestrator.service';
@@ -20,7 +20,7 @@ export class MCPController {
     this.router = Router();
     this.clientManager = clientManager;
     this.orchestrator = new MCPOrchestrator(clientManager);
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.setupRoutes();
   }
 

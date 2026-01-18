@@ -3,7 +3,7 @@
  * End-to-end testing of MCP client integration
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { MCPClientManager } from '../../src/services/mcp-client.service';
 import { mcpServerRegistryService } from '../../src/services/mcp-registry.service';
 import { MCPOrchestrator, WorkflowBuilder } from '../../src/services/mcp-orchestrator.service';

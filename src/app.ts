@@ -9,7 +9,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Logger } from './utils/logger';
+import { logger, Logger } from './utils/logger';
 import { ErrorHandler } from './middleware/error.middleware';
 import MCPController from './controllers/mcp.controller';
 import { MCPClientManager } from './services/mcp-client.service';
@@ -26,7 +26,7 @@ export class Application {
 
   constructor(port: number = 3000) {
     this.app = express();
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.clientManager = new MCPClientManager();
     this.port = port;
 

@@ -5,7 +5,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { RateLimiterService } from './rate-limiter.service';
 import { InvocationTrackerService } from './invocation-tracker.service';
 import { RollbackService } from './rollback.service';
@@ -68,7 +68,7 @@ export class MCPServerClient {
   constructor(serverUrl: string, serverId: string) {
     this.serverUrl = serverUrl;
     this.serverId = serverId;
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.rateLimiter = RateLimiterService.getInstance();
     this.invocationTracker = InvocationTrackerService.getInstance();
     this.rollbackService = RollbackService.getInstance();
@@ -226,7 +226,8 @@ export class MCPServerClient {
       }
 
       // Check rate limiting
-      if (!this.rateLimiter.allowRequest(this.serverId, request.invokedBy)) {
+      const rateLimitResult = this.rateLimiter.checkServerLimit(this.serverId);
+      if (!rateLimitResult.allowed) {
         const error = `Rate limit exceeded for server: ${this.serverId}`;
         this.invocationTracker.recordFailure(correlationId, error, 0);
 
@@ -641,7 +642,7 @@ export class MCPClientManager {
   private logger: Logger;
 
   constructor() {
-    this.logger = Logger.getInstance();
+    this.logger = logger;
   }
 
   /**

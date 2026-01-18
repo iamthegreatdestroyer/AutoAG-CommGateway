@@ -94,26 +94,27 @@ describe('Marketplace Integration Tests', () => {
   beforeEach(() => {
     // Clear all service state
     (serverRegistryService as any).servers.clear();
-    (serverRegistryService as any).categories.clear();
+    (serverRegistryService as any).categoryIndex.clear();
+    (serverRegistryService as any).tagIndex.clear();
     (serverRegistryService as any).publisherServers.clear();
-    (serverRegistryService as any).healthStatus.clear();
     (serverRegistryService as any).cache.clear();
 
     (ratingService as any).ratings.clear();
-    (ratingService as any).serverRatings.clear();
+    (ratingService as any).toolRatings.clear();
     (ratingService as any).userRatings.clear();
-    (ratingService as any).helpfulVotes.clear();
-    (ratingService as any).reports.clear();
-    (ratingService as any).userSubmissions.clear();
-    (ratingService as any).userReports.clear();
+    (ratingService as any).userToolRatings.clear();
+    (ratingService as any).userRatingTimestamps.clear();
+    (ratingService as any).userReportTimestamps.clear();
     (ratingService as any).cache.clear();
 
     (commissionService as any).commissions.clear();
     (commissionService as any).payoutBatches.clear();
     (commissionService as any).affiliateLinks.clear();
+    (commissionService as any).invokeCommissions.clear();
     (commissionService as any).publisherCommissions.clear();
     (commissionService as any).serverCommissions.clear();
-    (commissionService as any).affiliateCommissions.clear();
+    (commissionService as any).affiliateCodeMap.clear();
+    (commissionService as any).affiliateServerLinks.clear();
     (commissionService as any).cache.clear();
   });
 

@@ -79,7 +79,10 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Only start server if running directly (not during tests)
+if (require.main === module) {
+  startServer();
+}
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

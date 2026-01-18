@@ -4,7 +4,7 @@
  * Supports both per-tool and per-server rate limiting
  */
 
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 
 /**
  * Rate limit configuration
@@ -45,7 +45,7 @@ export class RateLimiterService {
   };
 
   private constructor() {
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.setupDefaultLimits();
     this.startCleanupInterval();
   }

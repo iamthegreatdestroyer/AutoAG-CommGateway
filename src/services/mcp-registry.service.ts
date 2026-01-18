@@ -3,7 +3,7 @@
  * Manages MCP server discovery, registration, and metadata
  */
 
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { MCPServerRegistry, MCPServerRegistryEntry, MCPServerCategory } from '../types/mcp.types';
 
 /**
@@ -16,7 +16,7 @@ export class MCPServerRegistryService implements MCPServerRegistry {
   private logger: Logger;
 
   constructor() {
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.initializeCategories();
   }
 

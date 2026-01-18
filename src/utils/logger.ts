@@ -39,6 +39,9 @@ export const logger = winston.createLogger({
   transports,
 });
 
+// Export Logger type for use in other files
+export type Logger = winston.Logger;
+
 // If not in production, log to console with more details
 if (config.nodeEnv !== 'production') {
   logger.debug('Logger initialized in development mode');

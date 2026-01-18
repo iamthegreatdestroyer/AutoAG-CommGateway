@@ -4,7 +4,7 @@
  * Handles tool chaining, error recovery, and result aggregation
  */
 
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { MCPClientManager, MCPServerClient } from './mcp-client.service';
 import { mcpServerRegistryService } from './mcp-registry.service';
 import {
@@ -76,7 +76,7 @@ export class MCPOrchestrator {
 
   constructor(clientManager: MCPClientManager) {
     this.clientManager = clientManager;
-    this.logger = Logger.getInstance();
+    this.logger = logger;
   }
 
   /**

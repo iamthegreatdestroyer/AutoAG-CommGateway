@@ -19,3 +19,10 @@ temp/
 .prisma/
 prisma/migrations/
 !prisma/migrations/.gitkeep
+
+# Local History
+.history/
+
+# Diagnostic files
+*-diagnostic.txt
+test-*.txt

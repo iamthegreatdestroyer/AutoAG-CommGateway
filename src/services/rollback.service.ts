@@ -4,7 +4,7 @@
  * Tracks rollback history for debugging and auditing
  */
 
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { InvocationTrackerService, InvocationRecord } from './invocation-tracker.service';
 
 /**
@@ -51,7 +51,7 @@ export class RollbackService {
   private logger: Logger;
 
   private constructor() {
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.invocationTracker = InvocationTrackerService.getInstance();
   }
 

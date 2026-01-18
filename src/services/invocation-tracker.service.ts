@@ -4,7 +4,7 @@
  * Provides audit trail and invocation history
  */
 
-import { Logger } from '../utils/logger';
+import { logger, Logger } from '../utils/logger';
 import { ToolInvocationResponse } from '../types/mcp.types';
 
 /**
@@ -44,7 +44,7 @@ export class InvocationTrackerService {
   private retentionMs = 86400000; // 24 hours by default
 
   private constructor() {
-    this.logger = Logger.getInstance();
+    this.logger = logger;
     this.startCleanupInterval();
   }
 

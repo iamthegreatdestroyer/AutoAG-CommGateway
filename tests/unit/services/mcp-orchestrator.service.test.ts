@@ -3,7 +3,7 @@
  * Test suite for workflow orchestration functionality
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import {
   MCPOrchestrator,
   WorkflowBuilder,

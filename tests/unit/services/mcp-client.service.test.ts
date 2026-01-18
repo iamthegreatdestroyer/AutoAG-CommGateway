@@ -3,7 +3,7 @@
  * Comprehensive test suite for MCP client functionality
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { MCPServerClient, MCPClientManager } from '../../src/services/mcp-client.service';
 import {
   ServerConnectionRequest,
@@ -19,7 +19,7 @@ describe('MCPServerClient', () => {
 
   beforeEach(() => {
     client = new MCPServerClient(testServerUrl, testServerId);
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Connection Management', () => {
@@ -35,7 +35,7 @@ describe('MCPServerClient', () => {
       };
 
       // Mock successful connection
-      vi.spyOn(client as any, 'callJSON_RPC').mockResolvedValueOnce({
+      jest.spyOn(client as any, 'callJSON_RPC').mockResolvedValueOnce({
         version: '1.0.0',
       });
 
@@ -52,9 +52,9 @@ describe('MCPServerClient', () => {
       };
 
       // Mock failed connection
-      vi.spyOn(client as any, 'callJSON_RPC').mockRejectedValueOnce(
-        new Error('Connection refused')
-      );
+      jest
+        .spyOn(client as any, 'callJSON_RPC')
+        .mockRejectedValueOnce(new Error('Connection refused'));
 
       // Result: Should throw MCPServerConnectionError
       // Expected: Error with appropriate message
@@ -149,7 +149,7 @@ describe('MCPServerClient', () => {
 
   describe('Event Handling', () => {
     it('should emit SERVER_CONNECTED event', async () => {
-      const listener = vi.fn();
+      const listener = jest.fn();
       client.on('SERVER_CONNECTED' as any, listener);
 
       // Trigger connection
@@ -158,7 +158,7 @@ describe('MCPServerClient', () => {
     });
 
     it('should emit TOOL_COMPLETED event', async () => {
-      const listener = vi.fn();
+      const listener = jest.fn();
       client.on('TOOL_COMPLETED' as any, listener);
 
       // Trigger tool invocation
@@ -167,7 +167,7 @@ describe('MCPServerClient', () => {
     });
 
     it('should emit TOOL_FAILED event', async () => {
-      const listener = vi.fn();
+      const listener = jest.fn();
       client.on('TOOL_FAILED' as any, listener);
 
       // Trigger failed tool invocation
