@@ -5,7 +5,6 @@
  */
 
 import { logger, Logger } from '../utils/logger';
-import { ToolInvocationResponse } from '../types/mcp.types';
 
 /**
  * Complete invocation record

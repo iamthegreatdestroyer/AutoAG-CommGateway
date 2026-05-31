@@ -95,10 +95,11 @@ export class MCPController {
       const { serverId } = req.body;
 
       if (!serverId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'serverId is required',
         });
+        return;
       }
 
       this.logger.info(`[MCP Controller] Disconnecting server: ${serverId}`);
@@ -117,7 +118,7 @@ export class MCPController {
   /**
    * List all connected servers
    */
-  private async listServers(req: Request, res: Response, next: NextFunction): Promise<void> {
+  private async listServers(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const servers = this.clientManager.getConnectedServers();
 
@@ -140,10 +141,11 @@ export class MCPController {
       const client = this.clientManager.getClient(serverId);
 
       if (!client) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Server not found: ${serverId}`,
         });
+        return;
       }
 
       const serverInfo = client.getServerInfo();
@@ -166,10 +168,11 @@ export class MCPController {
       const client = this.clientManager.getClient(serverId);
 
       if (!client) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Server not found: ${serverId}`,
         });
+        return;
       }
 
       const isHealthy = client.isConnected();
@@ -191,7 +194,7 @@ export class MCPController {
   /**
    * List all available tools
    */
-  private async listAllTools(req: Request, res: Response, next: NextFunction): Promise<void> {
+  private async listAllTools(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const servers = this.clientManager.getConnectedServers();
       const allTools = servers.flatMap((server) =>
@@ -221,10 +224,11 @@ export class MCPController {
       const client = this.clientManager.getClient(serverId);
 
       if (!client) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Server not found: ${serverId}`,
         });
+        return;
       }
 
       const tools = await client.discoverTools();
@@ -252,10 +256,11 @@ export class MCPController {
         .find((t) => t.id === toolId);
 
       if (!tool) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Tool not found: ${toolId}`,
         });
+        return;
       }
 
       res.status(200).json({
@@ -276,25 +281,28 @@ export class MCPController {
       const { serverId, parameters, timeout } = req.body;
 
       if (!serverId) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'serverId is required',
         });
+        return;
       }
 
       const client = this.clientManager.getClient(serverId);
       if (!client) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Server not found: ${serverId}`,
         });
+        return;
       }
 
       const invocationRequest: ToolInvocationRequest = {
         toolId,
+        serverId,
         parameters: parameters || {},
         timeout,
-        invokedBy: req.user?.id || 'anonymous',
+        invokedBy: (req.user as { id?: string })?.id || 'anonymous',
       };
 
       const result = await client.invokeTool(invocationRequest);
@@ -386,10 +394,11 @@ export class MCPController {
       const status = this.orchestrator.getWorkflowStatus(workflowId);
 
       if (!status) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: `Workflow not found: ${workflowId}`,
         });
+        return;
       }
 
       res.status(200).json({
@@ -426,7 +435,7 @@ export class MCPController {
   /**
    * Get registry statistics
    */
-  private async getRegistryStats(req: Request, res: Response, next: NextFunction): Promise<void> {
+  private async getRegistryStats(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const stats = mcpServerRegistryService.getStatistics();
 
@@ -444,7 +453,7 @@ export class MCPController {
    */
   private async searchRegistry(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { query, type, category } = req.query;
+      const { query, category } = req.query;
 
       let results = mcpServerRegistryService.getAllServers();
 

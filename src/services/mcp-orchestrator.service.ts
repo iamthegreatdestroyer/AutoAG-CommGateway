@@ -5,8 +5,7 @@
  */
 
 import { logger, Logger } from '../utils/logger';
-import { MCPClientManager, MCPServerClient } from './mcp-client.service';
-import { mcpServerRegistryService } from './mcp-registry.service';
+import { MCPClientManager } from './mcp-client.service';
 import {
   ToolInvocationRequest,
   ToolInvocationResponse,
@@ -228,6 +227,7 @@ export class MCPOrchestrator {
 
     const invocationRequest: ToolInvocationRequest = {
       toolId: step.toolId,
+      serverId: step.serverId,
       parameters: step.parameters || {},
       timeout: step.timeout,
       invokedBy: 'orchestrator',

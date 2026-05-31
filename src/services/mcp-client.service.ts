@@ -18,7 +18,6 @@ import {
   ToolInvocationResponse,
   ServerConnectionRequest,
   ServerConnectionResponse,
-  DiscoveredMCPServer,
   MCPClientEvent,
   MCPEventType,
   MCPError,
@@ -58,15 +57,13 @@ export class MCPServerClient {
   private requestId: number = 0;
   private eventListeners: Map<MCPEventType, Function[]> = new Map();
   private logger: Logger;
-  private serverUrl: string;
   private serverId: string;
   private connectionTimeout: number = 10000; // 10 seconds
   private rateLimiter: RateLimiterService;
   private invocationTracker: InvocationTrackerService;
   private rollbackService: RollbackService;
 
-  constructor(serverUrl: string, serverId: string) {
-    this.serverUrl = serverUrl;
+  constructor(_serverUrl: string, serverId: string) {
     this.serverId = serverId;
     this.logger = logger;
     this.rateLimiter = RateLimiterService.getInstance();
@@ -590,7 +587,7 @@ export class MCPServerClient {
   /**
    * Check rate limit for tool
    */
-  private async checkRateLimit(toolId: string): Promise<void> {
+  private async checkRateLimit(_toolId: string): Promise<void> {
     // TODO: Implement rate limiting check with Redis
     // This will check tool-specific rate limits
   }

@@ -378,6 +378,60 @@ export interface MCPClientEvent {
  */
 
 /**
+ * ===========================
+ * Registry Types
+ * ===========================
+ */
+
+export type MCPServerCategory =
+  | 'data_processing'
+  | 'ai_ml'
+  | 'cloud_services'
+  | 'authentication'
+  | 'analytics'
+  | 'integration'
+  | 'utilities'
+  | 'security'
+  | 'monitoring'
+  | 'other';
+
+export interface MCPServerRegistryEntry {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  url: string;
+  category: MCPServerCategory;
+  capabilities: Array<{ type: string; supported: boolean; version?: string; features?: string[] }>;
+  authentication: { type: string; required: boolean; [key: string]: unknown };
+  documentation?: string;
+  registeredAt: Date;
+  lastCheckedAt: Date;
+  status: 'healthy' | 'degraded' | 'unknown' | 'error';
+}
+
+export interface MCPServerRegistry {
+  registerServer(entry: MCPServerRegistryEntry): void;
+  unregisterServer(serverId: string): void;
+  getServer(serverId: string): MCPServerRegistryEntry | null;
+  getAllServers(): MCPServerRegistryEntry[];
+}
+
+/**
+ * ===========================
+ * JWT Payload
+ * ===========================
+ */
+
+export interface JWTPayload {
+  id: string;
+  email?: string;
+  role?: string;
+  iat?: number;
+  exp?: number;
+}
+
+/**
  * MCP-specific Error
  */
 export class MCPError extends Error {
@@ -465,5 +519,15 @@ export class MCPTimeoutError extends MCPError {
   constructor(toolId: string, timeout: number) {
     super('TOOL_TIMEOUT', `Tool ${toolId} invocation timed out after ${timeout}ms`, 504);
     this.name = 'MCPTimeoutError';
+  }
+}
+
+/**
+ * Orchestration Error
+ */
+export class MCPOrchestrationError extends MCPError {
+  constructor(workflowId: string, message: string, details?: Record<string, any>) {
+    super('ORCHESTRATION_ERROR', `Workflow ${workflowId} failed: ${message}`, 500, details);
+    this.name = 'MCPOrchestrationError';
   }
 }

@@ -441,7 +441,7 @@ export class X402PaymentService extends EventEmitter {
   /**
    * Sign challenge with server key
    */
-  private signChallenge(data: string): string {
+  private signChallenge(_data: string): string {
     // Simplified signing - in production use real crypto signing
     return 'sig_' + randomBytes(32).toString('hex');
   }

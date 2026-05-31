@@ -66,7 +66,6 @@ export class RefundService extends EventEmitter {
 
   // Configuration
   private readonly refundWalletAddress: string;
-  private readonly refundWalletPrivateKey: string;
   private readonly gasMultiplier: number;
   private readonly maxRefundRetries: number;
 
@@ -83,7 +82,6 @@ export class RefundService extends EventEmitter {
 
     // Configuration from environment
     this.refundWalletAddress = process.env.POLYGON_REFUND_WALLET_ADDRESS || '';
-    this.refundWalletPrivateKey = process.env.POLYGON_REFUND_WALLET_KEY || '';
     this.gasMultiplier = parseFloat(process.env.REFUND_GAS_MULTIPLIER || '1.2');
     this.maxRefundRetries = parseInt(process.env.REFUND_MAX_RETRIES || '3');
 
@@ -462,7 +460,7 @@ export class RefundService extends EventEmitter {
   /**
    * Wait for refund transaction confirmation
    */
-  private async waitForRefundConfirmation(refundId: string, txHash: string): Promise<void> {
+  private async waitForRefundConfirmation(_refundId: string, txHash: string): Promise<void> {
     const maxWaitTime = 300000; // 5 minutes
     const pollInterval = 5000; // 5 seconds
     const startTime = Date.now();
@@ -485,7 +483,7 @@ export class RefundService extends EventEmitter {
   /**
    * Get transaction confirmation count
    */
-  private async getTransactionConfirmations(txHash: string): Promise<number> {
+  private async getTransactionConfirmations(_txHash: string): Promise<number> {
     // Simulate getting confirmations
     // In production: use Web3.js to query blockchain
     return Math.min(12, Math.floor(Math.random() * 15));

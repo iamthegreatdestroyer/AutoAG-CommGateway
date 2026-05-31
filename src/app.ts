@@ -10,10 +10,12 @@ import morgan from 'morgan';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger, Logger } from './utils/logger';
-import { ErrorHandler } from './middleware/error.middleware';
+import { errorHandler as ErrorHandler } from './api/middleware/errorHandler';
 import MCPController from './controllers/mcp.controller';
 import { MCPClientManager } from './services/mcp-client.service';
 import { mcpServerRegistryService } from './services/mcp-registry.service';
+import { gatewayRouter } from './gateway/gateway.router';
+import { mcpAdapterRouter } from './gateway/mcp.adapter';
 
 /**
  * Application class
@@ -66,15 +68,15 @@ export class Application {
     // Request tracing
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       const correlationId = req.headers['x-correlation-id'] || uuidv4();
-      (req as any).correlationId = correlationId;
+      (req as unknown as Record<string, unknown>).correlationId = correlationId;
       res.set('X-Correlation-ID', String(correlationId));
       next();
     });
 
     // Request validation middleware
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
+    this.app.use((req: Request, _res: Response, next: NextFunction) => {
       this.logger.debug(`[${req.method}] ${req.path}`, {
-        correlationId: (req as any).correlationId,
+        correlationId: (req as unknown as Record<string, unknown>).correlationId,
       });
       next();
     });
@@ -85,7 +87,7 @@ export class Application {
    */
   private setupControllers(): void {
     // Health check
-    this.app.get('/health', (req: Request, res: Response) => {
+    this.app.get('/health', (_req: Request, res: Response) => {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date(),
@@ -95,7 +97,7 @@ export class Application {
     });
 
     // API info
-    this.app.get('/api/info', (req: Request, res: Response) => {
+    this.app.get('/api/info', (_req: Request, res: Response) => {
       res.status(200).json({
         name: 'AutoAG-CommGateway',
         version: '1.0.0',
@@ -106,6 +108,12 @@ export class Application {
         },
       });
     });
+
+    // Gateway commerce routes
+    this.app.use('/api/gateway', gatewayRouter);
+
+    // MCP adapter (tool_call / tool_result protocol)
+    this.app.use('/mcp', mcpAdapterRouter);
 
     // MCP routes
     const mcpController = new MCPController(this.clientManager);
@@ -125,10 +133,7 @@ export class Application {
    * Setup error handling
    */
   private setupErrorHandling(): void {
-    const errorHandler = new ErrorHandler();
-    this.app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-      errorHandler.handle(err, req, res);
-    });
+    this.app.use(ErrorHandler);
   }
 
   /**
