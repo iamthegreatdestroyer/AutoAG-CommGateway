@@ -19,6 +19,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import axios from 'axios';
 import {
   serverRegistryService,
   ServerCategory,
@@ -31,6 +32,12 @@ import {
 } from '../../src/services/marketplace/commission.service';
 import { marketplaceController } from '../../src/controllers/marketplace.controller';
 import type { Request, Response } from 'express';
+
+// Mock axios so server endpoint validation never makes real network/DNS calls.
+// Mirrors the pattern already established in
+// tests/unit/services/marketplace/server-registry.service.test.ts.
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // ============================================================================
 // TEST SETUP & UTILITIES
@@ -92,12 +99,23 @@ describe('Marketplace Integration Tests', () => {
   // ==========================================================================
 
   beforeEach(() => {
-    // Clear all service state
-    (serverRegistryService as any).servers.clear();
-    (serverRegistryService as any).categoryIndex.clear();
-    (serverRegistryService as any).tagIndex.clear();
-    (serverRegistryService as any).publisherServers.clear();
-    (serverRegistryService as any).cache.clear();
+    // Reset server registry state via its own public reset API. This clears
+    // servers/tagIndex/publisherServers/cache AND re-seeds categoryIndex with
+    // an empty Set per ServerCategory — categoryIndex is only ever populated
+    // once, in the service's private constructor (singleton), so manually
+    // calling categoryIndex.clear() here (as this test previously did) wipes
+    // those pre-seeded keys permanently for the rest of the process and
+    // crashes every subsequent registerServer() call in indexServer().
+    serverRegistryService.resetForTesting();
+
+    // Default axios mock so ServerRegistryService#validateServerEndpoint
+    // never makes a real network/DNS call for any endpoint used below.
+    // Mirrors tests/unit/services/marketplace/server-registry.service.test.ts.
+    mockedAxios.get.mockResolvedValue({
+      status: 200,
+      headers: {},
+      data: {},
+    } as any);
 
     (ratingService as any).ratings.clear();
     (ratingService as any).toolRatings.clear();
@@ -149,7 +167,13 @@ describe('Marketplace Integration Tests', () => {
 
       const server = await serverRegistryService.registerServer(serverRegistration);
       expect(server.id).toBeDefined();
-      expect(server.status).toBe('pending');
+      // Servers are active immediately unless SERVER_REGISTRATION_APPROVAL_REQUIRED=true
+      // (unset/false in this test environment, per CONFIG.REGISTRATION_APPROVAL_REQUIRED
+      // in server-registry.service.ts). Matches the assertion already verified in
+      // tests/unit/services/marketplace/server-registry.service.test.ts:88. The previous
+      // expectation of the string 'pending' was also never a valid status value — the
+      // pending enum member is ServerStatus.PENDING_REVIEW ('pending_review').
+      expect(server.status).toBe(ServerStatus.ACTIVE);
 
       // STEP 2: Activate server (simulate approval)
       await serverRegistryService.updateServerStatus(server.id, ServerStatus.ACTIVE);
@@ -429,7 +453,7 @@ describe('Marketplace Integration Tests', () => {
             subscriptionAvailable: true,
           },
         },
-        user: { id: publisherId, role: 'publisher' },
+        user: { userId: publisherId, role: 'publisher' },
       });
       const registerRes = createMockResponse();
 
@@ -452,7 +476,7 @@ describe('Marketplace Integration Tests', () => {
           review: 'Great server!',
           verified: true,
         },
-        user: { id: userId, role: 'user' },
+        user: { userId, role: 'user' },
       });
       const ratingRes = createMockResponse();
 
@@ -472,8 +496,11 @@ describe('Marketplace Integration Tests', () => {
       await marketplaceController.getServerRatings(getRatingsReq as any, getRatingsRes as any);
 
       expect(getRatingsRes.jsonData.success).toBe(true);
-      expect(getRatingsRes.jsonData.data.items).toHaveLength(1);
-      expect(getRatingsRes.jsonData.data.items[0].stars).toBe(5);
+      // RatingPage (rating.service.ts) names this field `ratings`, not `items` —
+      // confirmed by the same service's direct-call usage earlier in this file
+      // (`serverRatings.ratings`, line ~200) and by the RatingPage interface itself.
+      expect(getRatingsRes.jsonData.data.ratings).toHaveLength(1);
+      expect(getRatingsRes.jsonData.data.ratings[0].stars).toBe(5);
 
       // STEP 4: Search servers via controller
       const searchReq = createMockRequest({
@@ -484,7 +511,8 @@ describe('Marketplace Integration Tests', () => {
       await marketplaceController.searchServers(searchReq as any, searchRes as any);
 
       expect(searchRes.jsonData.success).toBe(true);
-      expect(searchRes.jsonData.data.items.length).toBeGreaterThan(0);
+      // SearchResult (server-registry.service.ts) names this field `servers`, not `items`.
+      expect(searchRes.jsonData.data.servers.length).toBeGreaterThan(0);
     });
 
     it('should enforce authorization in controller', async () => {
@@ -511,7 +539,7 @@ describe('Marketplace Integration Tests', () => {
       const updateReq = createMockRequest({
         params: { id: server.id },
         body: { description: 'Unauthorized change' },
-        user: { id: otherUserId, role: 'user' },
+        user: { userId: otherUserId, role: 'user' },
       });
       const updateRes = createMockResponse();
 
@@ -525,7 +553,7 @@ describe('Marketplace Integration Tests', () => {
       const ownerUpdateReq = createMockRequest({
         params: { id: server.id },
         body: { description: 'Authorized change' },
-        user: { id: publisherId, role: 'publisher' },
+        user: { userId: publisherId, role: 'publisher' },
       });
       const ownerUpdateRes = createMockResponse();
 
@@ -548,7 +576,7 @@ describe('Marketplace Integration Tests', () => {
           stars: 0, // Invalid: must be 1-5
           verified: true,
         },
-        user: { id: 'user-1', role: 'user' },
+        user: { userId: 'user-1', role: 'user' },
       });
       const res = createMockResponse();
 
@@ -575,34 +603,44 @@ describe('Marketplace Integration Tests', () => {
     it('should handle rate limit errors', async () => {
       const userId = 'rate-limit-user';
 
-      // Register server
-      const server = await serverRegistryService.registerServer({
-        name: 'Rate Limit Test',
-        description: 'Testing rate limits',
-        publisherId: 'pub-1',
-        endpoint: 'https://api.example.com/rate-limit-test',
-        category: ServerCategory.OTHER,
-        tags: [],
-        pricing: {
-          defaultTier: 'standard',
-          customPricing: false,
-          freeTrialInvocations: 100,
-          subscriptionAvailable: true,
-        },
-      });
-      const serverId = server.id;
-      await serverRegistryService.updateServerStatus(serverId, ServerStatus.ACTIVE);
+      // Register 6 distinct servers. RatingService#submitRating checks
+      // per-(userId, toolId) duplicate-rating first (userToolRatings map) and
+      // only then the per-userId rolling-hour rate limit (userRatingTimestamps),
+      // and MAX_RATINGS_PER_HOUR is 5 — so exercising the rate limit with 6
+      // submissions requires 6 different toolIds for the same user. Rating the
+      // same server 6 times (as this test previously did) would always throw
+      // DuplicateRatingError (409) starting on the 2nd call, never reaching
+      // enough distinct submissions to trip RateLimitError on the 6th.
+      const servers = [];
+      for (let i = 0; i < 6; i++) {
+        const server = await serverRegistryService.registerServer({
+          name: `Rate Limit Test ${i}`,
+          description: 'Testing rate limits',
+          publisherId: 'pub-1',
+          endpoint: `https://api.example.com/rate-limit-test-${i}`,
+          category: ServerCategory.OTHER,
+          tags: [],
+          pricing: {
+            defaultTier: 'standard',
+            customPricing: false,
+            freeTrialInvocations: 100,
+            subscriptionAvailable: true,
+          },
+        });
+        await serverRegistryService.updateServerStatus(server.id, ServerStatus.ACTIVE);
+        servers.push(server);
+      }
 
-      // Submit 6 ratings (exceeds 5/hour limit)
+      // Submit 6 ratings across the 6 distinct servers (exceeds 5/hour limit)
       for (let i = 0; i < 6; i++) {
         const req = createMockRequest({
           body: {
-            toolId: serverId,
+            toolId: servers[i].id,
             stars: 5,
-            review: `Review ${i}`,
+            review: `Review number ${i}`,
             verified: true,
           },
-          user: { id: userId, role: 'user' },
+          user: { userId, role: 'user' },
         });
         const res = createMockResponse();
 
@@ -653,7 +691,7 @@ describe('Marketplace Integration Tests', () => {
         toolId: serverId,
         userId: 'user-1',
         stars: 5,
-        review: 'Great!',
+        review: 'Great server overall!',
         verified: true,
       });
 
@@ -690,7 +728,7 @@ describe('Marketplace Integration Tests', () => {
       // Register some data in each service
       const server = await serverRegistryService.registerServer({
         name: 'Health Test',
-        description: 'Test',
+        description: 'Health check integration test server',
         publisherId: 'pub-health',
         endpoint: 'https://api.example.com/health-test',
         category: ServerCategory.OTHER,
@@ -708,7 +746,7 @@ describe('Marketplace Integration Tests', () => {
         toolId: server.id,
         userId: 'user-health',
         stars: 5,
-        review: 'Test',
+        review: 'Test review for health check',
         verified: true,
       });
 
@@ -750,7 +788,7 @@ describe('Marketplace Integration Tests', () => {
       // Trigger workflow
       const server = await serverRegistryService.registerServer({
         name: 'Event Test',
-        description: 'Test',
+        description: 'Event propagation integration test server',
         publisherId: 'pub-event',
         endpoint: 'https://api.example.com/event-test',
         category: ServerCategory.OTHER,
@@ -768,7 +806,7 @@ describe('Marketplace Integration Tests', () => {
         toolId: server.id,
         userId: 'user-event',
         stars: 5,
-        review: 'Test',
+        review: 'Test review for event propagation',
         verified: true,
       });
 

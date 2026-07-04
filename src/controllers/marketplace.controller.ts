@@ -408,8 +408,16 @@ export class MarketplaceController {
 
       const filters = {
         minStars: minStars ? parseInt(minStars as string, 10) : undefined,
-        verified: verified === 'true',
-        hasReview: hasReview === 'true',
+        // RatingFilters treats `undefined` as "no filter applied" (see
+        // RatingService#applyFilters, which gates every filter behind
+        // `!== undefined`). Coercing an absent query param straight to
+        // `false` — as this used to do — set filters.verified/hasReview to
+        // the boolean false whenever the caller omitted them, which
+        // `applyFilters` then treats as an active "only unverified /
+        // only no-review" filter. That silently hid verified ratings (and
+        // ratings with reviews) from the default, unfiltered listing.
+        verified: verified === undefined ? undefined : verified === 'true',
+        hasReview: hasReview === undefined ? undefined : hasReview === 'true',
       };
 
       const pagination = {
