@@ -87,5 +87,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "handlebars": ">=4.7.9"
   }
 }
