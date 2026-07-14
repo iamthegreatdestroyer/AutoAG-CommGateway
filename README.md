@@ -35,6 +35,33 @@
 
 - 🔄 **Phase 4:** MCP Client & Tool Invocation (Infrastructure ready, tests passing)
 
+---
+
+## ⚠️ Stubbed / Not Yet Implemented (Phase 4–5 Future Work)
+
+Despite the "PRODUCTION READY" status above (which refers to the API/auth/DB/Docker
+foundation), several advertised subsystems are **scaffolded but NOT functional**. They
+return placeholders or use non-production implementations — do not treat them as complete:
+
+- **Tool-invocation route** (`src/api/routes/tools.ts`, `POST /api/tools/:id/invoke`) —
+  **STUB.** Returns a placeholder response (`"Tool invocation placeholder - implement in
+  Phase 4"`); no tool is actually executed. Real invocation is **Phase 4** work.
+- **MCP tracking / rollback** (`src/services/mcp-orchestrator.service.ts`) — the `rollback`
+  error-handling strategy is a **STUB** (`// TODO: Implement rollback logic`). On failure it
+  does not actually undo prior steps. **Phase 4** work.
+- **Redis rate-limiting** — **STUB / future work.** Current rate limiting
+  (`src/services/rate-limiter.service.ts`) is **in-memory only** (a per-process `Map`,
+  sliding window). It does **not** use Redis, so limits are not shared across instances and
+  reset on process restart. ⚠️ **Known minor DoS exposure:** a multi-instance or restarted
+  deployment can be bypassed. Distributed, Redis-backed rate limiting is **Phase 4–5** work.
+- **x402 chain-query / settlement** (`src/services/payment/x402-payment.service.ts`) —
+  **STUB.** Blockchain transaction queries (`queryBlockchainTransaction`), balance lookups,
+  and settlement are **simulated/placeholder** ("For now, simulate successful validation");
+  no real Web3 chain query or on-chain settlement occurs. **Phase 5** work.
+  ⚠️ When built, settlement **MUST respect simulate-before-sign** — every transaction has to
+  pass simulation before any signing step.
+
+
 📖 See [SESSION-9-TESTING-COMPLETE.md](SESSION-9-TESTING-COMPLETE.md) for infrastructure recovery & testing report.  
 📖 See [SESSION-8-COMPLETION.md](SESSION-8-COMPLETION.md) for detailed API implementation.  
 📖 See [PHASE-3-COMPLETE.md](ACTION-PLANS/PHASE-3-COMPLETE.md) for Phase 3 details.
