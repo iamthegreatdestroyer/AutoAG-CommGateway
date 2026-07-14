@@ -285,15 +285,8 @@ export class MarketplaceController {
         return;
       }
 
-      // Method not implemented yet - return placeholder
-      const stats = {
-        publisherId,
-        totalServers: 0,
-        activeServers: 0,
-        totalRevenue: 0,
-      };
-
-      res.json(this.successResponse(stats));
+      // Method not implemented yet
+      res.status(501).json(this.errorResponse('NOT_IMPLEMENTED', 'Feature not yet available'));
     } catch (error) {
       this.handleError(error, res);
     }
