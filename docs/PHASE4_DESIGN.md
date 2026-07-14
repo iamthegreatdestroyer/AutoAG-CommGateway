@@ -150,7 +150,7 @@ Two in-memory limiters today; the Redis + `RATE_LIMIT_*` config exists but is un
   `Map`, same algorithm). Makes limits correct across multiple instances/workers.
 - **D3.3 Authoritative dimension order:** per-**API-key** (if present) → per-**user** (if authed) →
   per-**IP** (anonymous). Plus per-tool and per-server quotas at the app layer.
-- **D3.4 Fail mode — SPLIT (⚠️ needs your sign-off):** **fail-OPEN** for the app-layer quota limiter
+- **D3.4 Fail mode — SPLIT (LOCKED 2026-07-14):** **fail-OPEN** for the app-layer quota limiter
   (a paid API shouldn't hard-down on a Redis blip — availability > strict quota), but **fail-CLOSED**
   for the **auth-endpoint** edge limiter, falling back to the per-instance in-memory limiter so
   brute-force protection never evaporates on a Redis outage. This is the security-conscious default.
@@ -159,12 +159,16 @@ Two in-memory limiters today; the Redis + `RATE_LIMIT_*` config exists but is un
 
 ---
 
-## OPEN — still needs your sign-off before build
-1. **D3.4 fail-open (app quota) vs fail-closed (auth)** — confirm the split, or force one policy.
-2. **D1.3 `BILLING_ENABLED` default** — recommend `false` (paid tools return 501 until you flip it),
-   so this stays clear of the money-path deferral. Confirm.
-3. **Credential encryption key custody (`MCP_CRED_KEY`)** — env var vs a KMS/Sigma Rust signer. Env is
-   simplest for now (0600, never committed); flag if you want KMS from the start.
+## DECIDED — locked 2026-07-14 (no open decisions remain; build session may proceed without gates)
+1. **Rate-limit fail mode → SPLIT: fail-OPEN app-layer quota, fail-CLOSED auth endpoints.** A Redis
+   outage degrades quota accounting (availability preserved) but never drops brute-force protection —
+   the auth limiter falls back to the per-instance in-memory express limiter. (Resolves D3.4.)
+2. **`BILLING_ENABLED` default → `false`.** Free tools work fully; `PAY_PER_CALL` tools return
+   `501 FEATURE_DISABLED` until explicitly enabled. Keeps Phase 4 clear of the deferred money paths.
+   (Resolves D1.3.)
+3. **`MCP_CRED_KEY` custody → env var (0600, never committed) for now.** AES-256-GCM under an env key;
+   migrating to a KMS / the Sigma Rust signer is a documented future upgrade, not a Phase-4 blocker.
+   (Resolves D1.2 key custody.)
 
 ## Sequencing (on the NUC)
 1. Gap 2 (rollback) — smallest, no schema/Redis, unit-testable in isolation → land first.
