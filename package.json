@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/iamthegreatdestroyer/AutoAG-CommGateway.git"
   },
-  "author": "iamthegreatdestroyer",
+  "author": "Stephen Bilodeau <sgbilod@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0",
